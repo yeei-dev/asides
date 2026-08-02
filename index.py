@@ -5962,6 +5962,16 @@ async def on_ready() -> None:
 def main() -> None:
     if not TOKEN:
         raise RuntimeError("BOT_TOKEN or FAMQ_BOT_TOKEN is missing in famq-bot/.env")
+
+    # Добавляем статус
+    @bot.event
+    async def on_ready():
+        await bot.change_presence(
+            status=discord.Status.online,
+            activity=discord.Game(name="Работает благодаря Diamond")
+        )
+        print(f"✅ Бот {bot.user} запущен!")
+
     bot.run(TOKEN)
 
 
