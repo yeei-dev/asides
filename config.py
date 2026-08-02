@@ -1,0 +1,231 @@
+import os
+from datetime import timedelta, timezone
+from pathlib import Path
+from typing import Any
+
+import discord
+from dotenv import load_dotenv
+
+
+BASE_DIR = Path(__file__).resolve().parent
+# The hosting setup historically used `env`, while local development commonly
+# uses `.env`. Loading both keeps deployments backwards compatible.
+load_dotenv(BASE_DIR / "env")
+load_dotenv(BASE_DIR / ".env")
+
+DATA_DIR = BASE_DIR / "data"
+APPLICATIONS_FILE = DATA_DIR / "famq_applications.json"
+PANELS_FILE = DATA_DIR / "panels.json"
+GIVEAWAYS_FILE = DATA_DIR / "giveaways.json"
+VOICE_ROOMS_FILE = DATA_DIR / "voice_rooms.json"
+MEMBER_ACTIVITY_FILE = DATA_DIR / "member_activity.json"
+LEGACY_APPLICATIONS_FILE = BASE_DIR.parent / "data" / "famq_applications.json"
+
+
+def env_int(name: str, default: int) -> int:
+    """Read a numeric Discord identifier and fail clearly on an invalid value."""
+    raw_value = os.getenv(name, str(default)).strip()
+    try:
+        return int(raw_value)
+    except ValueError as error:
+        raise RuntimeError(f"{name} must be a numeric Discord ID") from error
+
+
+def env_int_list(name: str, default: str) -> list[int]:
+    values = os.getenv(name, default).split(",")
+    try:
+        return [int(value.strip()) for value in values if value.strip()]
+    except ValueError as error:
+        raise RuntimeError(f"{name} must contain comma-separated numeric Discord IDs") from error
+
+
+FAMQ_GUILD_ID = env_int("FAMQ_GUILD_ID", 1466147160763666472)
+FAMQ_PANEL_CHANNEL_ID = env_int("FAMQ_PANEL_CHANNEL_ID", 1466147735873786200)
+FAMQ_LOG_CHANNEL_ID = env_int("FAMQ_LOG_CHANNEL_ID", 1466322324184895510)
+FAMQ_RESULTS_CHANNEL_ID = env_int("FAMQ_RESULTS_CHANNEL_ID", 1494984412637429881)
+FAMQ_DM_FALLBACK_CHANNEL_ID = env_int("FAMQ_DM_FALLBACK_CHANNEL_ID", 1488477593589125171)
+FAMQ_INTERVIEW_CHANNEL_IDS = env_int_list("FAMQ_INTERVIEW_CHANNEL_IDS", "1488482479227797615,1488482493073068153")
+FAMQ_WAITING_CHANNEL_ID = env_int("FAMQ_WAITING_CHANNEL_ID", 1494985163178770432)
+FAMQ_INFO_CHANNEL_ID = env_int("FAMQ_INFO_CHANNEL_ID", 1466307109296668868)
+FAMQ_CONTRACTS_CHANNEL_ID = env_int("FAMQ_CONTRACTS_CHANNEL_ID", 1476848224026230885)
+FAMQ_FLEET_CHANNEL_ID = env_int("FAMQ_FLEET_CHANNEL_ID", 1476538051416162415)
+FAMQ_APPLICATION_CATEGORY_ID = env_int("FAMQ_APPLICATION_CATEGORY_ID", 1494984151516971128)
+FAMQ_WELCOME_CHANNEL_ID = env_int("FAMQ_WELCOME_CHANNEL_ID", 1504058190298353795)
+FAMQ_ACTIVITY_LOG_CHANNEL_ID = env_int("FAMQ_ACTIVITY_LOG_CHANNEL_ID", 1466322279440060572)
+FAMQ_STAFF_PANEL_CHANNEL_ID = env_int("FAMQ_STAFF_PANEL_CHANNEL_ID", 1533085586880200744)
+FAMQ_NICKNAME_REPORT_CHANNEL_ID = env_int("FAMQ_NICKNAME_REPORT_CHANNEL_ID", 1533219952591376384)
+GIVEAWAY_CHANNEL_ID = env_int("FAMQ_GIVEAWAY_CHANNEL_ID", 1494988017016897718)
+VOICE_PANEL_CHANNEL_ID = env_int("FAMQ_VOICE_PANEL_CHANNEL_ID", 1495067186237145188)
+VOICE_TRIGGER_CHANNEL_ID = env_int("FAMQ_VOICE_TRIGGER_CHANNEL_ID", 1495067302880608306)
+
+FAMQ_RECRUITER_ROLE_ID = env_int("FAMQ_RECRUITER_ROLE_ID", 1485562379512315996)
+GLOBAL_APPLICATION_PING_ROLE_ID = env_int("GLOBAL_APPLICATION_PING_ROLE_ID", 1485562379512315996)
+APPLICATION_EXTRA_ACCEPT_ROLE_ID = env_int("APPLICATION_EXTRA_ACCEPT_ROLE_ID", 1508315652849401968)
+APPLICATION_ACADEMY_ROLE_ID = env_int("APPLICATION_ACADEMY_ROLE_ID", 1508316765409775626)
+APPLICATION_CONTROL_ROLE_ID = env_int("APPLICATION_CONTROL_ROLE_ID", 1467068877572800720)
+FAMQ_DETROIT_TAG_ROLE_ID = env_int("FAMQ_DETROIT_TAG_ROLE_ID", 1486284234145665114)
+FAMQ_ACCEPT_ROLE_ID = env_int("FAMQ_ACCEPT_ROLE_ID", 1485370909148844154)
+FAMQ_DENVER_RECRUITER_ROLE_ID = env_int("FAMQ_DENVER_RECRUITER_ROLE_ID", 1485562379512315996)
+FAMQ_DENVER_ACCEPT_ROLE_ID = env_int("FAMQ_DENVER_ACCEPT_ROLE_ID", 0)
+FAMQ_SF_ROLE_1_ID = env_int("FAMQ_SF_ROLE_1_ID", 1486284234145665114)
+FAMQ_SF_ROLE_2_ID = env_int("FAMQ_SF_ROLE_2_ID", 1491839604402294814)
+FAMQ_SF_ACCEPT_ROLE_ID = env_int("FAMQ_SF_ACCEPT_ROLE_ID", 1493801356631347300)
+FAMQ_ORLANDO_ROLE_ID = env_int("FAMQ_ORLANDO_ROLE_ID", 1496179273273311232)
+FAMQ_ORLANDO_ACCEPT_ROLE_ID = env_int("FAMQ_ORLANDO_ACCEPT_ROLE_ID", 1496180200277409934)
+FAMQ_FRIEND_VERIFY_ROLE_1_ID = env_int("FAMQ_FRIEND_VERIFY_ROLE_1_ID", 1467068877572800720)
+FAMQ_FRIEND_VERIFY_ROLE_2_ID = env_int("FAMQ_FRIEND_VERIFY_ROLE_2_ID", 1501994072364027954)
+FAMQ_FRIEND_VERIFY_ACCEPT_ROLE_ID = env_int("FAMQ_FRIEND_VERIFY_ACCEPT_ROLE_ID", 1503996404828213258)
+FAMQ_DEP_LEADER_ROLE_ID = env_int("FAMQ_DEP_LEADER_ROLE_ID", 1501994072364027954)
+FAMQ_CURATOR_ROLE_ID = env_int("FAMQ_CURATOR_ROLE_ID", 1488568512489459752)
+FAMQ_BOSS_ROLE_ID = env_int("FAMQ_BOSS_ROLE_ID", 1466148246010335232)
+FAMQ_HIGH_ROLE_ID = env_int("FAMQ_HIGH_ROLE_ID", 1485371224593797150)
+
+FEDRU_GUILD_ID = env_int("FEDRU_GUILD_ID", 1495718321340026942)
+FEDRU_INFO_CHANNEL_ID = env_int("FEDRU_INFO_CHANNEL_ID", 1495718322484940903)
+FEDRU_PANEL_CHANNEL_ID = env_int("FEDRU_PANEL_CHANNEL_ID", 1495718322929406064)
+FEDRU_RESULTS_CHANNEL_ID = env_int("FEDRU_RESULTS_CHANNEL_ID", 1495718322929406065)
+FEDRU_FLEET_CHANNEL_ID = env_int("FEDRU_FLEET_CHANNEL_ID", 1495718323323928682)
+FEDRU_CONTRACTS_CHANNEL_ID = env_int("FEDRU_CONTRACTS_CHANNEL_ID", 1495718323323928683)
+FEDRU_VOICE_PANEL_CHANNEL_ID = env_int("FEDRU_VOICE_PANEL_CHANNEL_ID", 1495718322929406071)
+FEDRU_VOICE_TRIGGER_CHANNEL_ID = env_int("FEDRU_VOICE_TRIGGER_CHANNEL_ID", 1495718322929406072)
+FEDRU_RESTART_STATUS_CHANNEL_ID = env_int("FEDRU_RESTART_STATUS_CHANNEL_ID", 1495718325391589390)
+FEDRU_APPLICATION_LOG_CHANNEL_ID = env_int("FEDRU_APPLICATION_LOG_CHANNEL_ID", 1495718325391589388)
+FEDRU_SECURITY_LOG_CHANNEL_ID = env_int("FEDRU_SECURITY_LOG_CHANNEL_ID", 1495718325391589389)
+FEDRU_APPLICATION_CATEGORY_ID = env_int("FEDRU_APPLICATION_CATEGORY_ID", 1495718322484940908)
+FEDRU_RECRUITER_ROLE_ID = env_int("FEDRU_RECRUITER_ROLE_ID", 1495718321557999645)
+WHITELIST_CONTACT_ID = env_int("WHITELIST_CONTACT_ID", 1495718321557999645)
+
+TOKEN = os.getenv("BOT_TOKEN") or os.getenv("FAMQ_BOT_TOKEN")
+APPLICATION_ANNOUNCE_CHANNEL_ID = env_int("APPLICATION_ANNOUNCE_CHANNEL_ID", 1466147547193278568)
+RESTART_STATUS_CHANNEL_ID = env_int("FAMQ_RESTART_STATUS_CHANNEL_ID", 1494333628489011220)
+LOG_CHANNEL_ID = env_int("FAMQ_SECURITY_LOG_CHANNEL_ID", 1495406454985724035)
+ALERT_ROLE_ID = env_int("FAMQ_SECURITY_ALERT_ROLE_ID", 1467068877572800720)
+JOIN_THRESHOLD_WARNING = env_int("FAMQ_JOIN_THRESHOLD_WARNING", 5)
+JOIN_THRESHOLD_ALERT = env_int("FAMQ_JOIN_THRESHOLD_ALERT", 10)
+ANTI_NUKE_LIMITS = {
+    "channel_delete": env_int("FAMQ_ANTI_NUKE_CHANNEL_DELETE_LIMIT", 2),
+    "role_delete": env_int("FAMQ_ANTI_NUKE_ROLE_DELETE_LIMIT", 2),
+    "ban": env_int("FAMQ_ANTI_NUKE_BAN_LIMIT", 3),
+    "kick": env_int("FAMQ_ANTI_NUKE_KICK_LIMIT", 5),
+}
+SPAM_LIMIT = env_int("FAMQ_SPAM_LIMIT", 5)
+MSK_TZ = timezone(timedelta(hours=3), name="MSK")
+RESTART_HOURS_MSK = (8, 20)
+
+FAMILY_BRAND_BANNER_URL = (
+    "https://cdn.discordapp.com/banners/1466147160763666472/"
+    "59f6cd25885d5d98c0c4de5a78344832.png?size=1024"
+)
+GIVEAWAY_IMAGE_URL = FAMILY_BRAND_BANNER_URL
+VOICE_PANEL_THUMBNAIL_URL = FAMILY_BRAND_BANNER_URL
+FAMQ_GIF_URL = FAMILY_BRAND_BANNER_URL
+FAMQ_PROMO_IMAGE_URL = FAMILY_BRAND_BANNER_URL
+FAMQ_RESULT_GIF = FAMILY_BRAND_BANNER_URL
+
+FAMQ_SERVER_DETROIT = "detroit"
+FAMQ_SERVER_DENVER = "denver"
+FAMQ_SERVER_SF = "sf"
+FAMQ_SERVER_ORLANDO = "orlando"
+FAMQ_SERVER_FRIEND_VERIFICATION = "friend_verification"
+FEDRU_APPLICATION_SERVER = "federal_ru"
+
+PANEL_KEY = "famq_panel"
+INFO_PANEL_KEY = "famq_info_panel"
+CONTRACTS_PANEL_KEY = "famq_contracts_panel"
+FLEET_PANEL_KEY = "famq_fleet_panel"
+VOICE_PANEL_KEY = "famq_voice_panel"
+APPLICATION_STATE_KEY = "famq_application_state"
+PANEL_SELECT_ID = "famq_server_select"
+BTN_REVIEW_PREFIX = "famq_review_"
+BTN_ACCEPT_PREFIX = "famq_accept_"
+BTN_REJECT_PREFIX = "famq_reject_"
+BTN_CALL_PREFIX = "famq_call_"
+SELECT_CALL_PREFIX = "famq_callsel_"
+
+COLOR = 0x050505
+COLOR_SOFT = 0x111111
+COLOR_MUTED = 0x1A1A1A
+COLOR_PANEL = 0x090D14
+
+PROJECT_GUILD_IDS = (FAMQ_GUILD_ID, FEDRU_GUILD_ID)
+GUILD_SCOPES = [discord.Object(id=guild_id) for guild_id in PROJECT_GUILD_IDS]
+USI_ALLOWED_ROLE_IDS = [1487148388549132462, 1467068877572800720, 1485562379512315996, 1488568512489459752, 1466148166368760053]
+
+EMOJI_DETROIT_TEXT = "<:detroit:1495013594587332668>"
+EMOJI_SF_TEXT = "<:san_francisco:1495013800426868878>"
+EMOJI_ORLANDO_TEXT = "<:orlando:1496182029895860426>"
+EMOJI_REVIEW_TEXT = "<a:1468592290141307137:1495013592200777838>"
+EMOJI_ACCEPT_TEXT = "<a:1468592320512528415:1495013589583401083>"
+EMOJI_CALL_TEXT = "<a:1468592240099070015:1495013587373002782>"
+EMOJI_REJECT_TEXT = "<a:1468592303940829214:1495013583451324487>"
+EMOJI_FRIEND_TEXT = "🤝"
+
+EMOJI_DETROIT = discord.PartialEmoji(name="detroit", id=1495013594587332668)
+EMOJI_SF = discord.PartialEmoji(name="san_francisco", id=1495013800426868878)
+EMOJI_ORLANDO = discord.PartialEmoji(name="orlando", id=1495013800426868878)
+EMOJI_REVIEW = discord.PartialEmoji(name="review", id=1495013592200777838, animated=True)
+EMOJI_ACCEPT = discord.PartialEmoji(name="accept", id=1495013589583401083, animated=True)
+EMOJI_CALL = discord.PartialEmoji(name="call", id=1495013587373002782, animated=True)
+EMOJI_REJECT = discord.PartialEmoji(name="reject", id=1495013583451324487, animated=True)
+
+VOICE_EMOJI_ADD_SLOT_TEXT = "<:slot_add:1495066734518861834>"
+VOICE_EMOJI_REMOVE_SLOT_TEXT = "<:slot_remove:1495066731880648794>"
+VOICE_EMOJI_LOCK_TEXT = "<:room_lock:1495066729875902524>"
+VOICE_EMOJI_SPEAK_TEXT = "<:voice_toggle:1495066727858311289>"
+VOICE_EMOJI_KICK_TEXT = "<:kick_user:1495066725379739799>"
+VOICE_EMOJI_BITRATE_TEXT = "<:bitrate:1495066723332784341>"
+VOICE_EMOJI_SET_SLOTS_TEXT = "<:set_slots:1495066720665342092>"
+VOICE_EMOJI_TRANSFER_TEXT = "<:transfer_owner:1495066718370922768>"
+VOICE_EMOJI_RENAME_TEXT = "<:rename_room:1495066715728642129>"
+VOICE_EMOJI_ACCESS_TEXT = "<:room_access:1495066712679125095>"
+
+VOICE_EMOJI_ADD_SLOT = discord.PartialEmoji(name="slot_add", id=1495066734518861834)
+VOICE_EMOJI_REMOVE_SLOT = discord.PartialEmoji(name="slot_remove", id=1495066731880648794)
+VOICE_EMOJI_LOCK = discord.PartialEmoji(name="room_lock", id=1495066729875902524)
+VOICE_EMOJI_SPEAK = discord.PartialEmoji(name="voice_toggle", id=1495066727858311289)
+VOICE_EMOJI_KICK = discord.PartialEmoji(name="kick_user", id=1495066725379739799)
+VOICE_EMOJI_BITRATE = discord.PartialEmoji(name="bitrate", id=1495066723332784341)
+VOICE_EMOJI_SET_SLOTS = discord.PartialEmoji(name="set_slots", id=1495066720665342092)
+VOICE_EMOJI_TRANSFER = discord.PartialEmoji(name="transfer_owner", id=1495066718370922768)
+VOICE_EMOJI_RENAME = discord.PartialEmoji(name="rename_room", id=1495066715728642129)
+VOICE_EMOJI_ACCESS = discord.PartialEmoji(name="room_access", id=1495066712679125095)
+
+GLOBAL_APPLICATION_PING_ROLE_IDS = [APPLICATION_CONTROL_ROLE_ID, GLOBAL_APPLICATION_PING_ROLE_ID]
+
+PROJECT_CONFIGS: dict[int, dict[str, Any]] = {
+    FAMQ_GUILD_ID: {
+        "project_name": "ASIXEZ", "application_name": "ASIXEZ", "panel_mode": "multi_server",
+        "panel_channel_id": FAMQ_PANEL_CHANNEL_ID, "info_channel_id": FAMQ_INFO_CHANNEL_ID,
+        "results_channel_id": FAMQ_RESULTS_CHANNEL_ID, "fleet_channel_id": FAMQ_FLEET_CHANNEL_ID,
+        "contracts_channel_id": FAMQ_CONTRACTS_CHANNEL_ID, "voice_panel_channel_id": VOICE_PANEL_CHANNEL_ID,
+        "voice_trigger_channel_id": VOICE_TRIGGER_CHANNEL_ID, "restart_status_channel_id": RESTART_STATUS_CHANNEL_ID,
+        "application_log_channel_id": FAMQ_LOG_CHANNEL_ID, "security_log_channel_id": LOG_CHANNEL_ID,
+        "activity_log_channel_id": FAMQ_ACTIVITY_LOG_CHANNEL_ID, "alert_role_id": ALERT_ROLE_ID,
+        "application_category_id": FAMQ_APPLICATION_CATEGORY_ID, "dm_fallback_channel_id": FAMQ_DM_FALLBACK_CHANNEL_ID,
+        "interview_channel_ids": list(FAMQ_INTERVIEW_CHANNEL_IDS), "waiting_channel_id": FAMQ_WAITING_CHANNEL_ID,
+        "promo_code": "FED", "promo_register_url": "https://majestic-rp.ru/register?utm_campaign=FED",
+        "contracts_mode": "full", "fleet_mode": "full",
+        "application_options": [
+            {"key": FAMQ_SERVER_DETROIT, "label": "Detroit", "emoji": EMOJI_DETROIT, "emoji_text": EMOJI_DETROIT_TEXT, "recruiter_roles": [FAMQ_RECRUITER_ROLE_ID, FAMQ_DETROIT_TAG_ROLE_ID], "accept_role_id": FAMQ_ACCEPT_ROLE_ID},
+            {"key": FAMQ_SERVER_DENVER, "label": "Denver", "emoji": "🏔️", "emoji_text": "🏔️", "recruiter_roles": [FAMQ_DENVER_RECRUITER_ROLE_ID], "manager_roles": [FAMQ_DENVER_RECRUITER_ROLE_ID], "accept_role_id": FAMQ_DENVER_ACCEPT_ROLE_ID, "default_open": True},
+            {"key": FAMQ_SERVER_SF, "label": "San Francisco", "emoji": EMOJI_SF, "emoji_text": EMOJI_SF_TEXT, "recruiter_roles": [FAMQ_SF_ROLE_1_ID, FAMQ_SF_ROLE_2_ID], "accept_role_id": FAMQ_SF_ACCEPT_ROLE_ID},
+            {"key": FAMQ_SERVER_ORLANDO, "label": "Orlando", "emoji": EMOJI_ORLANDO, "emoji_text": EMOJI_ORLANDO_TEXT, "recruiter_roles": [FAMQ_ORLANDO_ROLE_ID], "accept_role_id": FAMQ_ORLANDO_ACCEPT_ROLE_ID},
+            {"key": FAMQ_SERVER_FRIEND_VERIFICATION, "label": "Верификация для друзей", "emoji": "🤝", "emoji_text": EMOJI_FRIEND_TEXT, "recruiter_roles": [FAMQ_FRIEND_VERIFY_ROLE_1_ID], "accept_role_id": FAMQ_FRIEND_VERIFY_ACCEPT_ROLE_ID, "visible_in_select": True},
+        ],
+    },
+    FEDRU_GUILD_ID: {
+        "project_name": "ASIXEZ RU", "application_name": "ASIXEZ RU", "panel_mode": "single_server",
+        "panel_channel_id": FEDRU_PANEL_CHANNEL_ID, "info_channel_id": FEDRU_INFO_CHANNEL_ID,
+        "results_channel_id": FEDRU_RESULTS_CHANNEL_ID, "fleet_channel_id": FEDRU_FLEET_CHANNEL_ID,
+        "contracts_channel_id": FEDRU_CONTRACTS_CHANNEL_ID, "voice_panel_channel_id": FEDRU_VOICE_PANEL_CHANNEL_ID,
+        "voice_trigger_channel_id": FEDRU_VOICE_TRIGGER_CHANNEL_ID, "restart_status_channel_id": FEDRU_RESTART_STATUS_CHANNEL_ID,
+        "application_log_channel_id": FEDRU_APPLICATION_LOG_CHANNEL_ID, "security_log_channel_id": FEDRU_SECURITY_LOG_CHANNEL_ID,
+        "alert_role_id": FEDRU_RECRUITER_ROLE_ID, "application_category_id": FEDRU_APPLICATION_CATEGORY_ID,
+        "dm_fallback_channel_id": None, "interview_channel_ids": [], "waiting_channel_id": None,
+        "promo_code": "FED", "promo_register_url": "", "contracts_mode": "empty", "fleet_mode": "empty",
+        "application_options": [{"key": FEDRU_APPLICATION_SERVER, "label": "ASIXEZ RU", "emoji": EMOJI_ACCEPT, "emoji_text": EMOJI_ACCEPT_TEXT, "recruiter_roles": [FEDRU_RECRUITER_ROLE_ID], "accept_role_id": None}],
+    },
+}
+
+
+__all__ = [name for name in globals() if name.isupper()]
