@@ -5968,7 +5968,7 @@ def main() -> None:
     async def on_ready():
         await bot.change_presence(
             status=discord.Status.online,
-            activity=discord.Game(name="Работает благодаря Diamond")
+            activity=discord.Game(name="Работает благодаря Diamond!")
         )
         print(f"✅ Бот {bot.user} запущен!")
 
